@@ -10,8 +10,8 @@ import nQueens.HelperFunctions;
 public class Main {
 	
 	public static int displayMenu(Scanner scan) {
-		System.out.println("-------------------");
-		System.out.println("N-Queen(N=8) Problem");
+
+		System.out.println("CS 4200 - Project 1: N-Queen(N=8) Problem");
 		System.out.println("-------------------");
 		System.out.println("Select Algorithm for Local Search");
 		System.out.println("[1] -------- Steepest-Ascent Hill Climbing");
@@ -165,7 +165,6 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		System.out.println("CS 4200 - Project 1");
 		Scanner scanner = new Scanner(System.in);
 		
 		int algChosen = displayMenu(scanner);
