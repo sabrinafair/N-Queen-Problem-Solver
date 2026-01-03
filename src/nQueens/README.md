@@ -1,6 +1,6 @@
 ## Project 2: N-Queen Problem Solver 
 Sabrina Ferras <br>
-1-1-2025 <br><br>
+1-1-2026 <br><br>
 Description: Implement an application to solve the N-Queens problem with n set to 8. Use two algorithms in implementation: Steepest-Ascent Hill Climbing and CSP Min-Conflict. 
 
 ### Run Program Steps

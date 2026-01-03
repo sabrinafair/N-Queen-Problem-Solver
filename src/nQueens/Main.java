@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.Scanner;
 
 import nQueens.HelperFunctions;
-//import nQueens.HelperFunctions.IntPair;
 
 public class Main {
 	
@@ -45,81 +44,22 @@ public class Main {
 		return puzzle;
 	}
 	
-	public static int countUnderAttack(String puzzle, int location) {
-		//under attack if there are queens in: it row or diagonal
-		int count = 0;
-		int onRow = puzzle.charAt(location - 1) - '0';
-		
-		for(int i = 1; i <= puzzle.length(); i++) {
-			if(location == i) continue;
-			int currQueen = puzzle.charAt(i - 1) - '0';
-			int additive = Math.abs(location - i);
-			int diagonalCheck1 = onRow + additive;
-			int diagonalCheck2 = onRow - additive;
-			if(currQueen == onRow) count++; //checks if on same row
-			//checks if on diagonal
-			if(currQueen == diagonalCheck1) count++;
-			if(currQueen == diagonalCheck2) count++;	
-		}
-		
-		return count;
-	}
-	
-	public static int getCurrTotalAttackers(String puzzle) {
-		int total = 0;
-		
-		for(int i = 1; i <= puzzle.length(); i++) {
-			total += countUnderAttack(puzzle, i);
-		}
-		return total / 2;
-	}
-	
-	public static String replaceChar(String str, int i, char c) {
-		String newStr = str.substring(0, i) + c + str.substring(i + 1);
-		return newStr;
-	}
-	public static PriorityQueue<puzzleState> getAllAttacksOptions(String puzzle, int n) {
-		PriorityQueue<puzzleState> currOptions = new PriorityQueue<>();
-		
-		for(int i = 1; i <= n; i++) {
-			String currPuzzle = puzzle;
-			for(int j = 1; j <= n; j++) {
-				currPuzzle = replaceChar(currPuzzle, i - 1, (char) (j + '0'));
-				int currTotal = getCurrTotalAttackers(currPuzzle);
-				currOptions.add(new puzzleState(currTotal, j, i));
-			}
-		}
-		return currOptions;
-	}
-	
-	public static PriorityQueue<puzzleState> getAttacksOptionsByColumn(String puzzle, int col, int n) {
-		PriorityQueue<puzzleState> currOptions = new PriorityQueue<>();
-		
-			String currPuzzle = puzzle;
-			for(int j = 1; j <= n; j++) { //loop through testing queen at all places in col for 1 to N
-				currPuzzle = replaceChar(currPuzzle, col - 1, (char) (j + '0'));
-				int currTotal = countUnderAttack(currPuzzle, col); //get # for current queen under attack
-				currOptions.add(new puzzleState(currTotal, j, col)); //add to priority queue
-			}
-		return currOptions;
-	}
-	
 	public static String[] useClimbHill(String puzzle, int n) {
 		boolean endSearch = false;
 		String newPuzzle = puzzle;
 		Integer steps = 1;
 		
-		while(!endSearch) {
-			PriorityQueue<puzzleState> currOptions = getAllAttacksOptions(newPuzzle, n);
-			int currTotal = getCurrTotalAttackers(newPuzzle);
+		while(!endSearch) { //algorithm loop
+			PriorityQueue<puzzleState> currOptions = HelperFunctions.getAllAttacksOptions(newPuzzle, n);
+			int currTotal = HelperFunctions.getCurrTotalAttackers(newPuzzle); //set current
 			puzzleState selectedOption = currOptions.poll();
-			if(selectedOption.cost >= currTotal) {
+			if(selectedOption.cost >= currTotal) { //check for if Value[neighbor] <= Value[current]
 				endSearch = true;
 				break;
 			}else {
 				int selectedVal = selectedOption.row;
 				int selectedIndex = selectedOption.col;
-				newPuzzle = replaceChar(newPuzzle, selectedIndex - 1, (char) (selectedVal + '0'));
+				newPuzzle = HelperFunctions.replaceChar(newPuzzle, selectedIndex - 1, (char) (selectedVal + '0'));
 				currOptions.clear();
 			}
 			steps++;
@@ -137,19 +77,19 @@ public class Main {
 		Random rand = new Random();
 		
 		while(steps < maxSteps && !solved) {
-			int currTotal = getCurrTotalAttackers(newPuzzle);
+			int currTotal = HelperFunctions.getCurrTotalAttackers(newPuzzle);
 			if(currTotal == 0) { //if current is a solution to csp
 				solved = true;
 				break;
 			}
 			
 			int randCol = rand.nextInt(n) + 1;
-			PriorityQueue<puzzleState> currOptions = getAttacksOptionsByColumn(newPuzzle, randCol, n);
+			PriorityQueue<puzzleState> currOptions = HelperFunctions.getAttacksOptionsByColumn(newPuzzle, randCol, n);
 			puzzleState selectedOption = currOptions.poll(); //get the lowest option
 			if(selectedOption.cost < currTotal) { //if total cost has improved take option
 				int selectedVal = selectedOption.row;
 				int selectedIndex = selectedOption.col;
-				newPuzzle = replaceChar(newPuzzle, selectedIndex - 1, (char) (selectedVal + '0'));
+				newPuzzle = HelperFunctions.replaceChar(newPuzzle, selectedIndex - 1, (char) (selectedVal + '0'));
 				currOptions.clear();
 			}
 			
@@ -167,9 +107,10 @@ public class Main {
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
 		
-		int algChosen = displayMenu(scanner);
-		int N = 8;
-
+		int algChosen = displayMenu(scanner); //get algorithm to use
+		int N = 8; //can set N here if want to test different N values
+		
+		//variable to use
 		String puzzle = "";
 		String finalState = "";
 		
@@ -178,7 +119,10 @@ public class Main {
 		scanner.nextLine();
 	
 
-		if(algChosen == 1) {
+		if(algChosen == 1) { 
+			//HILL CLIMBING ALGORITHM
+			
+			//variables for averages and timing
 			int countSolves = 0;
 			int countTotalSteps = 0;
 			int totalAttackers = 0;
@@ -188,7 +132,6 @@ public class Main {
 				long startTime = System.nanoTime();
 				long endTime = System.nanoTime();
 				long durationTimeNano = 0;
-				long durationTimeMili = 0;
 				
 				puzzle = initPuzzle(N);
 
@@ -197,13 +140,14 @@ public class Main {
 				System.out.println("Initial Puzzle: " + puzzle);
 				
 				String[] result = useClimbHill(puzzle, N);
-				finalState = result[0];
-				totalAttackers = getCurrTotalAttackers(finalState);
+				finalState = result[0]; //result returns array with final state of queens problem result[0] and steps taken result[1]
+				
+				totalAttackers = HelperFunctions.getCurrTotalAttackers(finalState);
 
 				System.out.println("Final State: " + finalState);
 				System.out.println("Final Total Attackers: " + totalAttackers);	
 				
-				if(totalAttackers == 0) {
+				if(totalAttackers == 0) { //check of solution is completely solved
 					countSolves++;
 					durationTimeNano = endTime - startTime;
 					System.out.println("Time ns: " + durationTimeNano);
@@ -217,11 +161,13 @@ public class Main {
 			displayResults(countSolves, percCorrect, totalTimeNano, countTotalSteps);
 			
 		} else if (algChosen == 2) {
+			//CSP MIN CONFLICT ALGORITHM
+			
+			//variables for averages and timing
 			int countSolves = 0;
 			int countTotalSteps = 0;
 			int totalAttackers = 0;
 			long totalTimeNano = 0;
-			long totalTimeMili = 0;
 			
 			for(int i = 0; i < runSolver; i++) {
 				long startTime = System.nanoTime();
@@ -235,13 +181,13 @@ public class Main {
 				System.out.println("Initial Puzzle");
 				System.out.println(puzzle);
 				String[] result = useCSP(puzzle, N, 100);
-				finalState = result[0];
-				totalAttackers = getCurrTotalAttackers(finalState);
+				finalState = result[0]; //result returns array with final state of queens problem result[0] and steps taken result[1]
+				totalAttackers = HelperFunctions.getCurrTotalAttackers(finalState);
 
 				System.out.println("Final State" + finalState);				
 				System.out.println("Final Total Attackers: " + totalAttackers);	
 				
-				if(totalAttackers == 0) {
+				if(totalAttackers == 0) { //check of solution is completely solved
 					countSolves++;
 					durationTimeNano = endTime - startTime;
 					System.out.println("Time ns: " + durationTimeNano);
@@ -255,8 +201,7 @@ public class Main {
 			double percCorrect = (((double)countSolves / (double)runSolver)) * 100;
 			displayResults(countSolves, percCorrect, totalTimeNano, countTotalSteps);
 			
-		}else if (algChosen == 3) finalState = useGeneric(puzzle);
-		else {
+		}else {
 			System.out.println("Incorrect input");	
 		}
 		
